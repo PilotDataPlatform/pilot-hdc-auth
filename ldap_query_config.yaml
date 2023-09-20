@@ -1,0 +1,4 @@
+GROUP_DN_TEMPLATE: cn={cn}-{group_name},ou={ou},dc={dc1},dc={dc2}
+USER_SEARCH_EMAIL_TEMPLATE: (&(objectClass=user)(mail={email}))
+USER_SEARCH_USERNAME_TEMPLATE: (&(objectClass=user)(users={username}))
+DC_TEMPLATE: dc={dc1},dc={dc2}

@@ -1,0 +1,62 @@
+[tool.poetry]
+name = "service_auth"
+version = "2.2.2"
+description = ""
+authors = ["Indoc Research <admin@indocresearch.org>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+casbin = "1.1.1"
+casbin_sqlalchemy_adapter = "0.3.1"
+certifi = "^2021.10.8"
+cffi = "1.15.0"
+opentelemetry-exporter-jaeger = "1.6.2"
+opentelemetry-instrumentation = "0.29b0"
+opentelemetry-instrumentation-logging = "0.29b0"
+opentelemetry-instrumentation-sqlalchemy = "0.29b0"
+opentelemetry-instrumentation-httpx = "0.29b0"
+opentelemetry-instrumentation-fastapi = "0.29b0"
+psycopg2-binary = "2.9.3"
+pycparser = "2.20"
+pydantic = "1.8.2"
+python-json-logger = "2.0.2"
+python-keycloak = { git = "https://github.com/PilotDataPlatform/python-keycloak" }
+python-ldap = "3.4.0"
+pytz = "2020.1"
+requests = "2.28.0"
+SQLAlchemy = "1.4.47"
+asyncpg = "0.27.0"
+greenlet = "2.0.2"
+fastapi = "^0.73.0"
+fastapi-utils = "^0.2.1"
+uvicorn = "^0.17.4"
+httpx = "^0.23.0"
+fastapi-sqlalchemy = "0.2.1"
+logger = "0.1.0"
+PyYAML = "^6.0"
+pilot-platform-common = "0.1.3"
+python-freeipa = "^1.0.6"
+frozenlist = "1.3.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "7.2.2"
+pytest-asyncio = "0.20.3"
+pytest-cov = "4.0.0"
+pytest-mock = "3.10.0"
+pytest-httpx = "0.21.3"
+pytest-httpserver = "1.0.6"
+sqlalchemy-utils = "0.38.2"
+testcontainers = "3.4.2"
+alembic = "1.7.7"
+Faker = "17.6.0"
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+concurrency = ["thread", "greenlet"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
