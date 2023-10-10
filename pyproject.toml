@@ -23,7 +23,7 @@ python-json-logger = "2.0.2"
 python-keycloak = { git = "https://github.com/PilotDataPlatform/python-keycloak" }
 python-ldap = "3.4.0"
 pytz = "2020.1"
-requests = "2.28.0"
+requests = "2.31.0"
 SQLAlchemy = "1.4.47"
 asyncpg = "0.27.0"
 greenlet = "2.0.2"
