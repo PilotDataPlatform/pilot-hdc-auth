@@ -1,4 +1,4 @@
-FROM python:3.9-buster AS production-environment
+FROM docker-registry.ebrains.eu/hdc-services-image/base-image:python-3.10.12-v2 AS production-environment
 
 ENV PYTHONDONTWRITEBYTECODE=true \
     PYTHONIOENCODING=UTF-8 \
@@ -19,15 +19,24 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
-WORKDIR /usr/src/app
-
 COPY poetry.lock pyproject.toml ./
 RUN poetry run pip install setuptools==65.6.3
 RUN poetry install --no-dev --no-interaction
 
-COPY . .
+COPY alembic.ini .
+COPY app ./app
+COPY attachments ./attachments
+COPY COPYRIGHT .
+COPY ldap_query_config.yaml .
+COPY LICENSE .
+COPY migrations ./migrations
+COPY poetry.lock .
+COPY pyproject.toml .
 
 FROM production-environment AS auth-image
+
+RUN chown -R app:app /app
+USER app
 
 CMD ["python3", "-m", "app"]
 
@@ -40,7 +49,11 @@ FROM development-environment AS alembic-image
 
 ENV ALEMBIC_CONFIG=alembic.ini
 
-COPY . .
+COPY app ./app
+COPY migrations ./migrations
+COPY alembic.ini ./
+RUN chown -R app:app /app
+USER app
 
 ENTRYPOINT ["python3", "-m", "alembic"]
 

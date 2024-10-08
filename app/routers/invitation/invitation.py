@@ -1,11 +1,11 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import math
 
-from common import LoggerFactory
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi_sqlalchemy import db
@@ -19,6 +19,7 @@ from app.commons.psql_services.user_event import update_event
 from app.components.identity.crud import IdentityCRUD
 from app.components.identity.dependencies import get_identity_crud
 from app.config import ConfigSettings
+from app.logger import logger
 from app.models.api_response import APIResponse
 from app.models.api_response import EAPIResponseCode
 from app.models.invitation import InvitationListPOST
@@ -39,19 +40,11 @@ _API_TAG = 'Invitation'
 class Invitation:
     identity_crud: IdentityCRUD = Depends(get_identity_crud)
 
-    _logger = LoggerFactory(
-        'api_invitation',
-        level_default=ConfigSettings.LOG_LEVEL_DEFAULT,
-        level_file=ConfigSettings.LOG_LEVEL_FILE,
-        level_stdout=ConfigSettings.LOG_LEVEL_STDOUT,
-        level_stderr=ConfigSettings.LOG_LEVEL_STDERR,
-    ).get_logger()
-
     @router.post(
         '/invitations', response_model=InvitationPOSTResponse, summary='Creates an new invitation', tags=[_API_TAG]
     )
     async def create_invitation(self, data: InvitationPOST):  # noqa:C901
-        self._logger.info('Called create_invitation')
+        logger.info('Called create_invitation')
         res = APIResponse()
         email = data.email
         relation_data = data.relationship
@@ -68,7 +61,7 @@ class Invitation:
 
         admin_client = await self.identity_crud.create_operations_admin()
         if await admin_client.get_user_by_email(email):
-            self._logger.info('User already exists in platform')
+            logger.info('User already exists in platform')
             res.result = '[ERROR] User already exists in platform'
             res.code = EAPIResponseCode.bad_request
             return res.json_response()
@@ -82,14 +75,15 @@ class Invitation:
         account_in_ad = False
         if ConfigSettings.ENABLE_ACTIVE_DIRECTORY:
             IdentityClient = get_identity_client()
-            with IdentityClient() as client:
-                account_in_ad = client.user_exists(email)
+            async with IdentityClient() as client:
+                account_in_ad = await client.user_exists(email)
+                self._logger.info(f'Is user account available in AD: {account_in_ad}')
                 if account_in_ad:
-                    client.add_user_to_group(email, ConfigSettings.AD_USER_GROUP)
+                    await client.add_user_to_group(email, ConfigSettings.AD_USER_GROUP)
                     if data.platform_role == 'admin':
-                        client.add_user_to_group(email, ConfigSettings.AD_ADMIN_GROUP)
+                        await client.add_user_to_group(email, ConfigSettings.AD_ADMIN_GROUP)
                     elif relation_data:
-                        client.add_user_to_group(email, ConfigSettings.LDAP_PREFIX + '-' + project['code'])
+                        await client.add_user_to_group(email, ConfigSettings.LDAP_PREFIX + '-' + project['code'])
 
         model_data = {
             'email': email,
@@ -125,7 +119,7 @@ class Invitation:
         tags=[_API_TAG],
     )
     async def check_user(self, email: str, project_code: str = ''):
-        self._logger.info('Called check_user')
+        logger.info('Called check_user')
         res = APIResponse()
         admin_client = await self.identity_crud.create_operations_admin()
         user_info = await admin_client.get_user_by_email(email)
@@ -133,10 +127,11 @@ class Invitation:
         if not user_info:
             invite = (
                 db.session.query(InvitationModel)
-                .filter(InvitationModel.email == email, InvitationModel.status.in_(['pending', 'sent']))
+                .filter(InvitationModel.email == email, InvitationModel.status == 'sent')
                 .first()
             )
             if invite:
+                self._logger.info(f'Invitation with id "{invite.id}" has been found.')
                 res.result = {
                     'name': '',
                     'email': invite.email,
@@ -175,7 +170,7 @@ class Invitation:
         '/invitation-list', response_model=InvitationPOSTResponse, summary='list invitations from psql', tags=[_API_TAG]
     )
     def invitation_list(self, data: InvitationListPOST):
-        self._logger.info('Called invitation_list')
+        logger.info('Called invitation_list')
         res = APIResponse()
         query = {}
         for field in ['project_code', 'status', 'invitation_code']:
@@ -194,7 +189,7 @@ class Invitation:
             invites = invites.order_by(sort_param).offset(data.page * data.page_size).limit(data.page_size).all()
         except Exception as e:
             error_msg = f'Error querying invite for listing in psql: {str(e)}'
-            self._logger.error(error_msg)
+            logger.error(error_msg)
             raise APIException(status_code=EAPIResponseCode.internal_error.value, error_msg=error_msg)
 
         res.result = [i.to_dict() for i in invites]
@@ -210,7 +205,7 @@ class Invitation:
         tags=[_API_TAG],
     )
     async def invitation_update(self, invite_id: str, data: InvitationPUT):
-        self._logger.info('Called invitation_update')
+        logger.info('Called invitation_update')
         res = APIResponse()
         update_data = {}
         if data.status:
@@ -227,7 +222,7 @@ class Invitation:
             db.session.commit()
         except Exception as e:
             error_msg = f'Error updating invite in psql: {str(e)}'
-            self._logger.error(error_msg)
+            logger.error(error_msg)
             raise APIException(status_code=EAPIResponseCode.internal_error.value, error_msg=error_msg)
         res.result = 'success'
         return res.json_response()

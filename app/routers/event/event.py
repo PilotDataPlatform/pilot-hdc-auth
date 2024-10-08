@@ -1,11 +1,11 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import math
 
-from common import LoggerFactory
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi_utils.cbv import cbv
@@ -14,7 +14,7 @@ from app.commons.psql_services.user_event import create_event
 from app.commons.psql_services.user_event import query_events
 from app.components.identity.crud import IdentityCRUD
 from app.components.identity.dependencies import get_identity_crud
-from app.config import ConfigSettings
+from app.logger import logger
 from app.models.api_response import APIResponse
 from app.models.events import EventGETResponse
 from app.models.events import EventList
@@ -30,18 +30,10 @@ _API_TAG = 'Event'
 class UserEvent:
     identity_crud: IdentityCRUD = Depends(get_identity_crud)
 
-    _logger = LoggerFactory(
-        'api_user_event',
-        level_default=ConfigSettings.LOG_LEVEL_DEFAULT,
-        level_file=ConfigSettings.LOG_LEVEL_FILE,
-        level_stdout=ConfigSettings.LOG_LEVEL_STDOUT,
-        level_stderr=ConfigSettings.LOG_LEVEL_STDERR,
-    ).get_logger()
-
     @router.post('/events', response_model=EventPOSTResponse, summary='Creates a new event', tags=[_API_TAG])
     async def create_event(self, data: EventPOST):
         """Create event in psql event table of actions on user account such as invites or roles changes."""
-        self._logger.info('Called create_event')
+        logger.info('Called create_event')
         api_response = APIResponse()
 
         event_data = {
@@ -59,7 +51,7 @@ class UserEvent:
     @router.get('/events', response_model=EventGETResponse, summary='list events', tags=[_API_TAG])
     def list_events(self, data: EventList = Depends(EventList)):
         """Lists events from psql event table of actions on user account such as invites or roles changes."""
-        self._logger.info('Called list_events')
+        logger.info('Called list_events')
         api_response = APIResponse()
         query = {}
         if data.user_id:

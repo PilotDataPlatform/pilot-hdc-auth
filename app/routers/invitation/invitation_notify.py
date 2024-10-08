@@ -1,30 +1,22 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import base64
 
-from common import LoggerFactory
-
 from app.components.identity.crud import IdentityCRUD
 from app.config import ConfigSettings
+from app.logger import logger
 from app.models.sql_invitation import InvitationModel
 from app.services.notifier_services.email_service import SrvEmail
-
-_logger = LoggerFactory(
-    'api_invitation',
-    level_default=ConfigSettings.LOG_LEVEL_DEFAULT,
-    level_file=ConfigSettings.LOG_LEVEL_FILE,
-    level_stdout=ConfigSettings.LOG_LEVEL_STDOUT,
-    level_stderr=ConfigSettings.LOG_LEVEL_STDERR,
-).get_logger()
 
 
 async def send_emails(
     invitation_entry: InvitationModel, project: dict, account_in_ad: bool, identity_crud: IdentityCRUD
 ):
-    _logger.info('Called send_emails')
+    logger.info('Called send_emails')
     email_sender = SrvEmail()
 
     inviter_entry = await identity_crud.get_user_by_username(invitation_entry.invited_by)

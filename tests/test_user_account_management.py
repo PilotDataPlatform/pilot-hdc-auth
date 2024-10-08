@@ -1,6 +1,7 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 from uuid import uuid4
@@ -81,7 +82,8 @@ def test_create_ad_group_no_identity_backend(test_client):
 
 @pytest.mark.parametrize('set_identity_backend', ['freeipa', 'openldap', 'keycloak'], indirect=True)
 def test_delete_ad_group_200(test_client, identity_client_mock, set_identity_backend):
-    response = test_client.delete(
+    response = test_client.request(
+        'DELETE',
         '/v1/user/group',
         json={
             'group_name': 'test_group',
@@ -91,7 +93,8 @@ def test_delete_ad_group_200(test_client, identity_client_mock, set_identity_bac
 
 
 def test_delete_ad_group_no_identity_backend(test_client):
-    response = test_client.delete(
+    response = test_client.request(
+        'DELETE',
         '/v1/user/group',
         json={
             'group_name': 'test_group',

@@ -1,9 +1,9 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
-from common import LoggerFactory
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi_utils import cbv
@@ -13,6 +13,7 @@ from app.commons.psql_services.user_event import create_event
 from app.components.identity.crud import IdentityCRUD
 from app.components.identity.dependencies import get_identity_crud
 from app.config import ConfigSettings
+from app.logger import logger
 from app.models.accounts import AccountRequestPOST
 from app.models.accounts import ContractRequestPOST
 from app.models.api_response import APIResponse
@@ -27,14 +28,6 @@ router = APIRouter()
 
 _API_TAG = '/v1/accounts'
 _API_NAMESPACE = 'accounts'
-
-logger = LoggerFactory(
-    _API_NAMESPACE,
-    level_default=ConfigSettings.LOG_LEVEL_DEFAULT,
-    level_file=ConfigSettings.LOG_LEVEL_FILE,
-    level_stdout=ConfigSettings.LOG_LEVEL_STDOUT,
-    level_stderr=ConfigSettings.LOG_LEVEL_STDERR,
-).get_logger()
 
 
 @cbv.cbv(router)
@@ -190,7 +183,7 @@ class AccountRequest:
                 'platform_role': 'member',
                 'project_role': ConfigSettings.TEST_PROJECT_ROLE,
                 'project_code': ConfigSettings.TEST_PROJECT_CODE,
-                'status': 'pending',
+                'status': 'sent',
             }
             invite = create_invite(invite_data)
 

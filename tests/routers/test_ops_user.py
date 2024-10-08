@@ -1,6 +1,7 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import re
@@ -19,9 +20,6 @@ def test_project_role_change_200(test_client, mocker, httpx_mock, keycloak_admin
     keycloak_client_mock.create_user(username=operator)
     keycloak_client_mock.create_role(user_id=UUID(TEST_USER['id']), name='indoctestproject-collaborator')
     httpx_mock.add_response(method='POST', url=ConfigSettings.NOTIFY_SERVICE + 'all/notifications/', status_code=204)
-    httpx_mock.add_response(method='POST', url=ConfigSettings.WORKSPACE_SERVICE + 'guacamole/users', status_code=200)
-    url = re.compile('^' + ConfigSettings.PROJECT_SERVICE + '/v1/workbenches/.*$')
-    httpx_mock.add_response(method='GET', url=url, status_code=200, json={'result': [{'resource': 'guacamole'}]})
     mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
 
     url = re.compile(
@@ -64,9 +62,6 @@ def test_project_role_change_notification_error_500(
     httpx_mock.add_response(
         method='POST', url=ConfigSettings.NOTIFY_SERVICE + 'all/notifications/', status_code=500, json={}
     )
-    httpx_mock.add_response(method='POST', url=ConfigSettings.WORKSPACE_SERVICE + 'guacamole/users', status_code=200)
-    url = re.compile('^' + ConfigSettings.PROJECT_SERVICE + '/v1/workbenches/.*$')
-    httpx_mock.add_response(method='GET', url=url, status_code=200, json={'result': [{'resource': 'guacamole'}]})
     mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
 
     url = re.compile(

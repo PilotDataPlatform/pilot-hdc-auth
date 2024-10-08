@@ -1,6 +1,7 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import logging
@@ -47,6 +48,9 @@ class Settings(BaseSettings):
     PORT: int = 5061
     HOST: str = '0.0.0.0'
     WORKERS: int = 1
+
+    LOGGING_LEVEL: int = logging.INFO
+    LOGGING_FORMAT: str = 'json'
 
     NOTIFY_SERVICE: str = 'http://notification.utility:5065'
     PROJECT_SERVICE: str = 'http://project.utility:5064'
@@ -125,11 +129,6 @@ class Settings(BaseSettings):
     REDIS_HOST: str = '127.0.0.1'
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: str
-
-    LOG_LEVEL_DEFAULT = logging.DEBUG
-    LOG_LEVEL_FILE = logging.DEBUG
-    LOG_LEVEL_STDOUT = logging.DEBUG
-    LOG_LEVEL_STDERR = logging.ERROR
 
     ROLE_NAME_REGEX: str = '^[a-zA-Z0-9_]*$'
 

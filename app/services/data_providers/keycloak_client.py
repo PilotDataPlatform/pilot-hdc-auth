@@ -1,16 +1,14 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
-from common import LoggerFactory
 from keycloak import KeycloakAdmin
 
-from app import ConfigSettings
+from app.config import ConfigSettings
 from app.models.api_response import EAPIResponseCode
 from app.resources.error_handler import APIException
-
-_logger = LoggerFactory('keycloak_client').get_logger()
 
 
 class KeycloakClient:

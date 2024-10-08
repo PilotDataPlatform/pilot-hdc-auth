@@ -1,6 +1,7 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import re
@@ -87,6 +88,26 @@ TEST_USER = {
     'firstName': 'firstName',
     'lastName': 'lastName',
     'attributes': {'status': ['active']},
+}
+
+HBAC_RULE = {
+    'result': [
+        {
+            'accessruletype': ['allow'],
+            'objectclass': ['ipaassociation', 'ipahbacrule'],
+            'ipauniqueid': ['2f703228-062d-11ef-ae01-0242ac120002'],
+            'description': ['HBAC rule for hostgroup_ldap-randomtest.dev.hdc.test.eu'],
+            'cn': ['access_ldap-randomtest.dev.hdc.test.eu'],
+            'ipaenabledflag': ['TRUE'],
+            'memberuser_user': ['testuser1', 'testuser2'],
+            'memberhost_hostgroup': ['hostgroup_ldap-randomtest.dev.hdc.test.eu'],
+            'memberservice_hbacsvc': ['sshd', 'xrdp', 'xrdp-sesman', 'sudo'],
+            'dn': 'ipaUniqueID=2f703228-062d-11ef-ae01-0242ac120002,cn=hbac,dc=dev,dc=hdc,dc=test,dc=eu',
+        }
+    ],
+    'count': 1,
+    'truncated': False,
+    'summary': '1 HBAC rule matched',
 }
 
 
@@ -283,7 +304,7 @@ async def identity_client_mock(mocker):  # noqa: C901
                 'groups': ['testgroup'],
             }
 
-        async def user_add(self, *args, **kwargs):
+        def user_add(self, *args, **kwargs):
             return {
                 'result': {
                     'uid': 'test',
@@ -294,6 +315,18 @@ async def identity_client_mock(mocker):  # noqa: C901
             }
 
         async def change_password(self, *args, **kwargs):
+            pass
+
+        def hbacrule_find(self, *args, **kwargs):
+            if kwargs['a_criteria'] == 'randomtest':
+                return HBAC_RULE
+            else:
+                return {'result': [], 'count': 0, 'truncated': False, 'summary': '0 HBAC rule matched'}
+
+        def hbacrule_add_user(self, *args, **kwargs):
+            pass
+
+        def hbacrule_remove_user(self, *args, **kwargs):
             pass
 
     class IdentityClientMock:
@@ -427,13 +460,13 @@ def test_client(app):
 
 @pytest.fixture
 def test_async_client(app):
-    client = AsyncClient(app=app, base_url='http://test')
+    client = AsyncClient(app=app)
     return client
 
 
 @pytest.fixture
-def non_mocked_hosts() -> list:
-    return ['test', '127.0.0.1']
+def non_mocked_hosts() -> list[str]:
+    return ['testserver']
 
 
 pytest_plugins = [

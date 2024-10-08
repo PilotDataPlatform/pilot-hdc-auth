@@ -1,6 +1,7 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import re
@@ -9,7 +10,6 @@ from uuid import uuid4
 from common import ProjectClient
 from keycloak import exceptions
 
-from app.config import ConfigSettings
 from app.resources.keycloak_api.ops_user import OperationsUser
 from tests.conftest import FakeProjectObject
 
@@ -87,9 +87,6 @@ def test_add_user_keycloak_realm_role(test_client, mocker, keycloak_admin_mock, 
     )
     mocker.patch('app.resources.keycloak_api.ops_admin.OperationsAdmin.assign_user_role', return_value={})
 
-    httpx_mock.add_response(method='POST', url=ConfigSettings.WORKSPACE_SERVICE + 'guacamole/users', status_code=200)
-    url = re.compile('^' + ConfigSettings.PROJECT_SERVICE + '/v1/workbenches/.*$')
-    httpx_mock.add_response(method='GET', url=url, status_code=200, json={'result': [{'resource': 'guacamole'}]})
     mocker.patch.object(ProjectClient, 'get', return_value=FakeProjectObject())
 
     response = test_client.post('/v1/user/project-role', json={'email': 'test_email', 'project_role': 'test_project'})

@@ -1,6 +1,7 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 from pydantic import BaseModel
@@ -17,7 +18,7 @@ class InvitationPUT(BaseModel):
 
     @validator('status')
     def validate_status(cls, v):
-        if v not in ['complete', 'pending']:
+        if v not in ['complete', 'sent']:
             raise APIException(status_code=EAPIResponseCode.bad_request.value, error_msg='Invalid status')
         return v
 

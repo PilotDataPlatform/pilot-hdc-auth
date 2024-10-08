@@ -1,6 +1,7 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import math
@@ -13,8 +14,6 @@ from keycloak import exceptions
 
 from app.commons.notification import record_newsfeed_notification
 from app.commons.psql_services.user_event import create_event
-from app.commons.workspace_service import add_guacamole_user
-from app.commons.workspace_service import get_workbench
 from app.components.identity.crud import IdentityCRUD
 from app.components.identity.dependencies import get_identity_crud
 from app.config import ConfigSettings
@@ -176,9 +175,6 @@ class UserProjectRole:
             error_msg = f'Fail to add user to group: {e}'
             raise APIException(status_code=EAPIResponseCode.internal_error.value, error_msg=error_msg)
 
-        if await get_workbench(data.project_code, 'guacamole'):
-            await add_guacamole_user(user['username'], data.project_code)
-
         old_role = old_role.split('-')[1]
         new_role = realm_role.split('-')[1]
         await create_event(
@@ -241,9 +237,6 @@ class UserProjectRole:
         except Exception as e:
             res.error_msg = f'Fail to add user to group: {e}'
             res.code = EAPIResponseCode.internal_error
-
-        if await get_workbench(data.project_code, 'guacamole'):
-            await add_guacamole_user(user['username'], data.project_code)
 
         if data.invite_event:
             await create_event(

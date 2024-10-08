@@ -1,9 +1,9 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
-from common import LoggerFactory
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi_utils import cbv
@@ -12,6 +12,7 @@ from app.commons.psql_services.user_event import create_event
 from app.components.identity.crud import IdentityCRUD
 from app.components.identity.dependencies import get_identity_crud
 from app.config import ConfigSettings
+from app.logger import logger
 from app.models.api_response import APIResponse
 from app.models.api_response import EAPIResponseCode
 from app.models.user_account_management import ADGroupCreateDELETE
@@ -28,13 +29,6 @@ router = APIRouter()
 
 _API_TAG = 'v1/user/account'
 _API_NAMESPACE = 'api_user_management'
-_logger = LoggerFactory(
-    _API_NAMESPACE,
-    level_default=ConfigSettings.LOG_LEVEL_DEFAULT,
-    level_file=ConfigSettings.LOG_LEVEL_FILE,
-    level_stdout=ConfigSettings.LOG_LEVEL_STDOUT,
-    level_stderr=ConfigSettings.LOG_LEVEL_STDERR,
-).get_logger()
 
 
 @cbv.cbv(router)
@@ -56,7 +50,7 @@ class UserADGroupOperations:
             200 updated
         """
 
-        _logger.info('Call API for user ad group operations')
+        logger.info('Call API for user ad group operations')
 
         response = APIResponse()
         operation_type = data.operation_type
@@ -76,7 +70,7 @@ class UserADGroupOperations:
 
         except Exception as e:
             msg = 'Failed to add user to group'
-            _logger.error(f'{msg}: {e.content.get("error_msg")}')
+            logger.error(f'{msg}: {e.content.get("error_msg")}')
             response.error_msg = msg
             response.code = EAPIResponseCode.internal_error
             response.total = 0
@@ -99,7 +93,7 @@ class UserADGroupOperations:
         Return:
             200
         """
-        _logger.info('Call API for user ad group creation')
+        logger.info('Call API for user ad group creation')
 
         response = APIResponse()
 
@@ -110,7 +104,7 @@ class UserADGroupOperations:
                 await client.create_group(group_name, data.description)
         except Exception as e:
             msg = 'Failed to create group'
-            _logger.error(f'{msg}: {e.content.get("error_msg")}')
+            logger.error(f'{msg}: {e.content.get("error_msg")}')
             response.error_msg = msg
             response.code = EAPIResponseCode.internal_error
             response.total = 0
@@ -132,7 +126,7 @@ class UserADGroupOperations:
         Return:
             200
         """
-        _logger.info('Call API for user ad group creation')
+        logger.info('Call API for user ad group creation')
 
         response = APIResponse()
 
@@ -142,7 +136,7 @@ class UserADGroupOperations:
                 await client.delete_group(client.format_group_name(data.group_name))
         except Exception as e:
             msg = 'Failed to delete group'
-            _logger.error(f'{msg}: {e.content.get("error_msg")}')
+            logger.error(f'{msg}: {e.content.get("error_msg")}')
             if type(e) == APIException:
                 response.error_msg = e.content.get('error_msg')
                 response.code = e.status_code
@@ -177,7 +171,7 @@ class UserManagementV1:
 
         """
 
-        _logger.info('Call API for update user accounts')
+        logger.info('Call API for update user accounts')
 
         res = APIResponse()
         try:
@@ -236,7 +230,7 @@ class UserManagementV1:
             res.code = EAPIResponseCode.success
 
         except Exception as e:
-            _logger.error(f'[Internal error] {e.content.get("error_msg")}')
+            logger.error(f'[Internal error] {e.content.get("error_msg")}')
             res.error_msg = f'[Internal error] {e}'
             res.code = EAPIResponseCode.internal_error
 

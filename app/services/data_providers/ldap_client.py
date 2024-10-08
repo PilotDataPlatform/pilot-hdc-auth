@@ -1,25 +1,18 @@
-# Copyright (C) 2022-2023 Indoc Systems
+# Copyright (C) 2022-Present Indoc Systems
 #
-# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
+# Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
 import ldap
 import ldap.modlist as modlist
 import yaml
-from common import LoggerFactory
 
 from app.commons.psql_services.ldap_id import create_ldap_id
 from app.config import ConfigSettings
+from app.logger import logger
 from app.models.base_models import EAPIResponseCode
 from app.resources.error_handler import APIException
-
-_logger = LoggerFactory(
-    'ldap client',
-    level_default=ConfigSettings.LOG_LEVEL_DEFAULT,
-    level_file=ConfigSettings.LOG_LEVEL_FILE,
-    level_stdout=ConfigSettings.LOG_LEVEL_STDOUT,
-    level_stderr=ConfigSettings.LOG_LEVEL_STDERR,
-).get_logger()
 
 
 class LdapClient:
@@ -112,13 +105,13 @@ class LdapClient:
         user_dn = user['dn']
         group_dn = self.format_group_dn(group_name)
 
-        _logger.info(f'add user: {email}')
-        _logger.info(f'add user from group dn: {group_name}')
+        logger.info(f'add user: {email}')
+        logger.info(f'add user from group dn: {group_name}')
         try:
             operation_list = [(ldap.MOD_ADD, 'member', [user_dn.encode('utf-8')])]
             self.conn.modify_s(group_dn, operation_list)
         except ldap.ALREADY_EXISTS:
-            _logger.info(f'Already in group skipping group add: {group_dn}')
+            logger.info(f'Already in group skipping group add: {group_dn}')
             return 'conflict'
         return 'success'
 
@@ -135,8 +128,8 @@ class LdapClient:
         Return:
             formated dn name(string)
         """
-        _logger.info(f'removed user: {email}')
-        _logger.info(f'remove user from group dn: {group_name}')
+        logger.info(f'removed user: {email}')
+        logger.info(f'remove user from group dn: {group_name}')
 
         user = self.get_user_by_email(email)
         user_dn = user['dn']
@@ -207,9 +200,9 @@ class LdapClient:
                     user_found = (user_dn, entry)
 
         if not user_found:
-            _logger.info(f'user {username} is not found in AD')
+            logger.info(f'user {username} is not found in AD')
             return None, None
-        _logger.info(f'found user by username: {user_found}')
+        logger.info(f'found user by username: {user_found}')
         return {
             'username': str(entry['uid'][0]),
             'first_name': str(entry['givenName'][0]),
@@ -267,7 +260,7 @@ class LdapClient:
         try:
             self.conn.add_s(user_dn, ldif)
         except Exception as e:
-            _logger.error(f'Error creating user in LDAP: {e}')
+            logger.error(f'Error creating user in LDAP: {e}')
         finally:
             self.conn.unbind_s()
         return 'success'
