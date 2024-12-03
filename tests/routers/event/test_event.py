@@ -67,6 +67,22 @@ def test_create_event_invite(test_client, keycloak_admin_mock, keycloak_client_m
     assert response.status_code == 200
 
 
+def test_create_event_test_project(test_client, keycloak_admin_mock, keycloak_client_mock):
+    target_user = 'testuser'
+    keycloak_client_mock.create_user(username=target_user)
+    keycloak_client_mock.create_user(username=user_json['username'])
+    payload = {
+        'operator': '',
+        'target_user': target_user,
+        'event_type': 'ADDED_TO_TEST_PROJECT',
+        'detail': {
+            'project_code': 'fakecode',
+        },
+    }
+    response = test_client.post('/v1/events', json=payload)
+    assert response.status_code == 200
+
+
 def test_create_event_role_no_operator(test_client, keycloak_admin_mock, keycloak_client_mock):
     target_user = 'testuser'
     keycloak_client_mock.create_user(username=target_user)

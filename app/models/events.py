@@ -26,6 +26,7 @@ class EventPOST(BaseModel):
         valid_event_types = [
             'INVITE_TO_PLATFORM',
             'INVITE_TO_PROJECT',
+            'ADDED_TO_TEST_PROJECT',
             'REMOVE_FROM_PROJECT',
             'ROLE_CHANGE',
             'ACCOUNT_DISABLE',
@@ -61,6 +62,16 @@ class EventGETResponse(APIResponse):
                     'target_user': 'exampleuser',
                     'target_user_id': '18ab20c1-173d-404a-826c-af619cd7a1ed',
                     'timestamp': '2022-04-07 18:38:41.891580',
+                },
+                {
+                    'detail': {'project_code': 'indoctestproject'},
+                    'event_type': 'ADDED_TO_TEST_PROJECT',
+                    'id': 'ce395904-d4a2-43a4-8704-4b8f001b4743',
+                    'operator': '',
+                    'operator_id': '',
+                    'target_user': 'exampleuser',
+                    'target_user_id': '18ab20c1-173d-404a-826c-af619cd7a1ed',
+                    'timestamp': '2024-04-07 18:38:41.891580',
                 },
                 {
                     'detail': {'invitation_id': '5afdae38-c4d4-4d84-812e-918b7ae5ce0a', 'platform_role': 'admin'},

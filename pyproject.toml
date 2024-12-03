@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "service_auth"
-version = "2.2.24"
+version = "2.2.25"
 description = ""
 authors = ["Indoc Research <admin@indocresearch.org>"]
 
