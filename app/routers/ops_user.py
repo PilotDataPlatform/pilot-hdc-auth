@@ -17,6 +17,8 @@ from app.commons.psql_services.user_event import create_event
 from app.components.identity.crud import IdentityCRUD
 from app.components.identity.dependencies import get_identity_crud
 from app.config import ConfigSettings
+from app.logger import AuditLog
+from app.logger import logger
 from app.models.api_response import APIResponse
 from app.models.api_response import EAPIResponseCode
 from app.models.ops_user import UserAuthPOST
@@ -57,19 +59,21 @@ class UserAuth:
         """
 
         res = APIResponse()
-        try:
-            username = data.username
-            password = data.password
+        username = data.username
+        password = data.password
 
+        try:
             realm = ConfigSettings.KEYCLOAK_REALM
             client_id = ConfigSettings.KEYCLOAK_CLIENT_ID
             client_secret = ConfigSettings.KEYCLOAK_SECRET
 
             user_client = await OperationsUser.create(client_id, realm, client_secret)
             admin_client = await identity_crud.create_operations_admin()
-            token = await user_client.get_token(username, password)
+            with AuditLog('authenticate a user using password', username=username):
+                token = await user_client.get_token(username, password)
             user_info = await identity_crud.get_user_by_username(username)
             if user_info.get('attributes', {}).get('status', ['disabled']) == ['disabled']:
+                logger.audit('Status check indicates that the user is disabled.', username=username)
                 raise exceptions.KeycloakAuthenticationError('User is disabled')
 
             user_id = user_info.get('id')
@@ -79,12 +83,23 @@ class UserAuth:
             res.result = token
             res.code = EAPIResponseCode.success
         except exceptions.KeycloakAuthenticationError as err:
+            logger.audit(
+                'Received an authentication error while attempting to authenticate a user with a password.',
+                username=username,
+            )
             res.error_msg = str(err)
             res.code = EAPIResponseCode.unauthorized
         except exceptions.KeycloakGetError as err:
+            logger.audit(
+                'Received a Keycloak error while attempting to authenticate a user with a password.', username=username
+            )
             res.error_msg = str(err)
             res.code = EAPIResponseCode.not_found
         except Exception as e:
+            logger.audit(
+                'Received an unexpected error while attempting to authenticate a user with a password.',
+                username=username,
+            )
             res.error_msg = f'User authentication failed : {e}'
             res.code = EAPIResponseCode.internal_error
 
@@ -121,7 +136,8 @@ class UserRefresh:
             client_id = ConfigSettings.KEYCLOAK_CLIENT_ID
             client_secret = ConfigSettings.KEYCLOAK_SECRET
             user_client = await OperationsUser.create(client_id, realm, client_secret)
-            token = await user_client.get_refresh_token(token)
+            with AuditLog('refresh token for a user'):
+                token = await user_client.get_refresh_token(token)
 
             res.result = token
             res.code = EAPIResponseCode.success
@@ -160,13 +176,20 @@ class UserProjectRole:
             user = await admin_client.get_user_by_email(email)
             roles = await self.identity_crud.get_user_realm_roles(user['id'])
 
-            old_role = ''
-            for role in roles:
-                if realm_role.split('-')[0] in role['name']:
-                    old_role = role['name']
-                    await admin_client.delete_role_of_user(user['id'], role['name'])
-                    break
-            await admin_client.assign_user_role(user['id'], realm_role)
+            with AuditLog(
+                'change user role',
+                user_id=user['id'],
+                project_code=data.project_code,
+                role=realm_role,
+                operator=data.operator,
+            ):
+                old_role = ''
+                for role in roles:
+                    if realm_role.split('-')[0] in role['name']:
+                        old_role = role['name']
+                        await admin_client.delete_role_of_user(user['id'], role['name'])
+                        break
+                await admin_client.assign_user_role(user['id'], realm_role)
 
             res.result = 'success'
             res.code = EAPIResponseCode.success
@@ -229,7 +252,15 @@ class UserProjectRole:
         try:
             admin_client = await self.identity_crud.create_operations_admin()
             user = await admin_client.get_user_by_email(email)
-            await admin_client.assign_user_role(user['id'], realm_role)
+
+            with AuditLog(
+                'set user role',
+                user_id=user['id'],
+                project_code=data.project_code,
+                role=realm_role,
+                operator=data.operator,
+            ):
+                await admin_client.assign_user_role(user['id'], realm_role)
 
             res.result = 'success'
             res.code = EAPIResponseCode.success
@@ -283,7 +314,15 @@ class UserProjectRole:
         try:
             admin_client = await self.identity_crud.create_operations_admin()
             user = await admin_client.get_user_by_email(email)
-            await admin_client.delete_role_of_user(user['id'], project_role)
+
+            with AuditLog(
+                'remove user role',
+                user_id=user['id'],
+                project_code=project_code,
+                role=project_role,
+                operator=operator,
+            ):
+                await admin_client.delete_role_of_user(user['id'], project_role)
 
             res.result = 'success'
             res.code = EAPIResponseCode.success

@@ -19,6 +19,7 @@ from app.commons.psql_services.user_event import update_event
 from app.components.identity.crud import IdentityCRUD
 from app.components.identity.dependencies import get_identity_crud
 from app.config import ConfigSettings
+from app.logger import AuditLog
 from app.logger import logger
 from app.models.api_response import APIResponse
 from app.models.api_response import EAPIResponseCode
@@ -77,7 +78,7 @@ class Invitation:
             IdentityClient = get_identity_client()
             async with IdentityClient() as client:
                 account_in_ad = await client.user_exists(email)
-                self._logger.info(f'Is user account available in AD: {account_in_ad}')
+                logger.info(f'Is user account available in AD: {account_in_ad}')
                 if account_in_ad:
                     await client.add_user_to_group(email, ConfigSettings.AD_USER_GROUP)
                     if data.platform_role == 'admin':
@@ -94,7 +95,11 @@ class Invitation:
         }
         if project:
             model_data['project_code'] = project['code']
-        invitation_entry = create_invite(model_data)
+
+        with AuditLog(
+            'create user invitation', user_email=email, invited_by=data.invited_by, platform_role=data.platform_role
+        ):
+            invitation_entry = create_invite(model_data)
 
         event_detail = {
             'operator': invitation_entry.invited_by,
@@ -131,7 +136,7 @@ class Invitation:
                 .first()
             )
             if invite:
-                self._logger.info(f'Invitation with id "{invite.id}" has been found.')
+                logger.info(f'Invitation with id "{invite.id}" has been found.')
                 res.result = {
                     'name': '',
                     'email': invite.email,
@@ -217,6 +222,12 @@ class Invitation:
             admin_client = await self.identity_crud.create_operations_admin()
             user = await admin_client.get_user_by_email(invite.email)
             update_event({'invitation_id': invite_id}, {'target_user': user['username'], 'target_user_id': user['id']})
+            logger.audit(
+                'User has successfully accepted an invite.',
+                invitation_code=invite.invitation_code,
+                user_email=invite.email,
+                platform_role=invite.platform_role,
+            )
         try:
             db.session.query(InvitationModel).filter_by(**query).update(update_data)
             db.session.commit()

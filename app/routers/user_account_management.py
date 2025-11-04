@@ -58,6 +58,12 @@ class UserADGroupOperations:
         user_email = data.user_email
 
         try:
+            logger.audit(
+                'Attempting to change user participation in project.',
+                user_email=user_email,
+                operation_type=operation_type,
+                group_code=group_code,
+            )
             IdentityClient = get_identity_client()
             async with IdentityClient() as client:
                 if operation_type == 'remove':
@@ -67,8 +73,19 @@ class UserADGroupOperations:
 
                 response.result = f'{operation_type} user {user_email} from ad group'
                 response.code = EAPIResponseCode.success
-
+                logger.audit(
+                    'Successfully managed to change user participation in project.',
+                    user_email=user_email,
+                    operation_type=operation_type,
+                    group_code=group_code,
+                )
         except Exception as e:
+            logger.audit(
+                'Received an unexpected error while attempting to change user participation in project.',
+                user_email=user_email,
+                operation_type=operation_type,
+                group_code=group_code,
+            )
             msg = 'Failed to add user to group'
             logger.error(f'{msg}: {e.content.get("error_msg")}')
             response.error_msg = msg
@@ -174,14 +191,23 @@ class UserManagementV1:
         logger.info('Call API for update user accounts')
 
         res = APIResponse()
-        try:
-            operation_type = data.operation_type
-            user_email = data.user_email
 
+        operation_type = data.operation_type
+        user_email = data.user_email
+        operator = data.operator
+
+        try:
             if operation_type not in ['enable', 'disable']:
                 res.error_msg = f'operation {operation_type} is not allowed'
                 res.code = EAPIResponseCode.bad_request
                 return res.json_response()
+
+            logger.audit(
+                'Attempting to change user status.',
+                user_email=user_email,
+                operation_type=operation_type,
+                operator=operator,
+            )
 
             status = {
                 'enable': 'active',
@@ -228,9 +254,20 @@ class UserManagementV1:
 
             res.result = f'{operation_type} user {user_email}'
             res.code = EAPIResponseCode.success
-
+            logger.audit(
+                'Successfully managed to change user status.',
+                user_email=user_email,
+                operation_type=operation_type,
+                operator=operator,
+            )
         except Exception as e:
-            logger.error(f'[Internal error] {e.content.get("error_msg")}')
+            logger.audit(
+                'Received an unexpected error while attempting to change user status.',
+                user_email=user_email,
+                operation_type=operation_type,
+                operator=operator,
+            )
+            logger.exception('[Internal error]')
             res.error_msg = f'[Internal error] {e}'
             res.code = EAPIResponseCode.internal_error
 
