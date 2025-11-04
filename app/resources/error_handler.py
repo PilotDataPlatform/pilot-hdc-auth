@@ -21,7 +21,7 @@ class APIException(Exception):
 
 
 def catch_internal(api_namespace):
-    """decorator to catch internal server error."""
+    """Decorator to catch internal server error."""
 
     def decorator(func):
         @wraps(func)

@@ -4,8 +4,6 @@
 # Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
-from typing import Union
-
 from common import ProjectException
 from common import configure_logging
 from fastapi import FastAPI
@@ -30,7 +28,7 @@ from app.resources.error_handler import APIException
 from app.routers.api_registry import api_registry
 
 
-def create_app(settings: Union[Settings, None] = None) -> FastAPI:
+def create_app(settings: Settings | None = None) -> FastAPI:
     """Initialize and configure the application."""
 
     if settings is None:

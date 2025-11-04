@@ -4,8 +4,6 @@
 # Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
-from typing import Optional
-
 from pydantic import BaseModel
 from pydantic import Field
 
@@ -13,7 +11,7 @@ from app.models.base_models import APIResponse
 
 
 class UserADGroupOperationsPUT(BaseModel):
-    """user authentication model."""
+    """User authentication model."""
 
     operation_type: str
     group_code: str
@@ -28,7 +26,7 @@ class UserManagementV1PUT(BaseModel):
 
 class ADGroupCreatePOST(BaseModel):
     group_name: str
-    description: Optional[str] = ''
+    description: str | None = ''
 
 
 class ADGroupCreatePOSTResponse(APIResponse):

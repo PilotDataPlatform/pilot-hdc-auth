@@ -8,14 +8,14 @@ from pydantic import BaseModel
 
 
 class UserAuthPOST(BaseModel):
-    """user authentication model."""
+    """User authentication model."""
 
     username: str
     password: str
 
 
 class UserTokenRefreshPOST(BaseModel):
-    """user token refresh model."""
+    """User token refresh model."""
 
     refreshtoken: str
 

@@ -3,8 +3,7 @@
 # Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE,
 # Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
-
-"""adding sorting field.
+"""Adding sorting field.
 
 Revision ID: 0012
 Revises: 0011

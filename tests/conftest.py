@@ -331,7 +331,7 @@ async def identity_client_mock(mocker):  # noqa: C901
 
     class IdentityClientMock:
         def __init__(self, *args, **kwargs):
-            self.objectclass = ['group'.encode('utf-8')]
+            self.objectclass = [b'group']
             self.conn = Conn()
             self.group_dn_template = 'cn={cn},ou={ou},dc={dc1},dc={dc2}'
             self.dc_template = ''

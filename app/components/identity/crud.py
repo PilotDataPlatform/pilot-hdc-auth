@@ -4,8 +4,6 @@
 # Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
-from typing import Optional
-from typing import Union
 from uuid import UUID
 
 from keycloak import ConnectionManager
@@ -43,13 +41,13 @@ class IdentityCRUD:
 
         return operations_admin
 
-    async def get_user_by_username(self, username: str) -> Optional[User]:
+    async def get_user_by_username(self, username: str) -> User | None:
         try:
             return await self.keycloak_client.get_user_by_username(username)
         except NotFound:
             return None
 
-    async def get_user_realm_roles(self, user_id: Union[UUID, str]) -> list[Role]:
+    async def get_user_realm_roles(self, user_id: UUID | str) -> list[Role]:
         if isinstance(user_id, str):
             user_id = UUID(user_id)
 

@@ -5,7 +5,6 @@
 # You may not use this file except in compliance with the License.
 
 from typing import Any
-from typing import Optional
 
 import httpx
 from keycloak import KeycloakAdmin
@@ -272,7 +271,7 @@ class OperationsAdmin:
             if api_res.status_code > 300:
                 raise Exception('Fail to remove user from realm: ' + str(api_res.__dict__))
 
-    async def create_project_realm_roles(self, project_roles: list, code: str) -> Optional[Response]:
+    async def create_project_realm_roles(self, project_roles: list, code: str) -> Response | None:
         """
         Summary:
             the function will use the native the keycloak api to create
@@ -359,7 +358,7 @@ class OperationsAdmin:
             res = await client.post(url=url, headers=self.header)
         return res
 
-    async def get_group_by_name(self, group_name: str) -> Optional[dict]:
+    async def get_group_by_name(self, group_name: str) -> dict | None:
         """
         Summary:
             the function will get the group from keycloak

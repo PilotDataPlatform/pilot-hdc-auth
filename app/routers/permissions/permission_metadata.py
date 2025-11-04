@@ -14,7 +14,6 @@ from fastapi_utils.cbv import cbv
 from app.commons.psql_services.permissions import get_casbin_rules
 from app.commons.psql_services.permissions import list_permissions
 from app.commons.psql_services.permissions import list_roles
-from app.config import ConfigSettings
 from app.models.api_response import EAPIResponseCode
 from app.models.permissions_schema import ListPermissions
 from app.models.permissions_schema import ListPermissionsResponse

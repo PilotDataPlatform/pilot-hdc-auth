@@ -6,9 +6,6 @@
 
 import json
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
 
 import httpx
 
@@ -25,7 +22,7 @@ class SrvEmail:
         msg_type: str = 'plain',
         template: str = None,
         template_kwargs: dict = None,
-        attachments: Optional[List[Dict[str, Any]]] = None,
+        attachments: list[dict[str, Any]] | None = None,
     ) -> None:
         """
         Summary:
