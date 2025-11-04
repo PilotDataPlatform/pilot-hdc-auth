@@ -22,7 +22,7 @@ class LdapClient:
         ldap.set_option(ldap.OPT_REFERRALS, ldap.OPT_OFF)
         self.conn = None
         self.objectclass = None
-        with open('ldap_query_config.yaml', 'r') as f:
+        with open('ldap_query_config.yaml') as f:
             try:
                 yaml_data = yaml.safe_load(f)
                 self.group_dn_template = yaml_data.get('GROUP_DN_TEMPLATE')
@@ -221,7 +221,7 @@ class LdapClient:
 
     async def create_group(self, group_name: str, description: str = ''):
         group_dn = self.format_group_dn(group_name)
-        user_object_class = f'{ConfigSettings.LDAP_PREFIX}-{group_name}'.encode('utf-8')
+        user_object_class = f'{ConfigSettings.LDAP_PREFIX}-{group_name}'.encode()
         attrs = {'objectclass': self.objectclass, ConfigSettings.LDAP_USER_QUERY_FIELD: user_object_class}
         if description:
             attrs['description'] = description.encode('utf-8')
@@ -250,9 +250,9 @@ class LdapClient:
             'cn': cn.encode('utf-8'),
             'givenName': first_name.encode('utf-8'),
             'sn': last_name.encode('utf-8'),
-            'homeDirectory': f'/home/{username}'.encode('utf-8'),
-            'uidNumber': '0'.encode('utf-8'),
-            'gidNumber': '0'.encode('utf-8'),
+            'homeDirectory': f'/home/{username}'.encode(),
+            'uidNumber': b'0',
+            'gidNumber': b'0',
             'mail': email.encode('utf-8'),
             'userPassword': password.encode('utf-8'),
         }

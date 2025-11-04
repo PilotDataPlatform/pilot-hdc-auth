@@ -4,8 +4,6 @@
 # Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
-from typing import Optional
-
 from pydantic import BaseModel
 from pydantic import Field
 
@@ -23,8 +21,8 @@ class UserOpsPOST(BaseModel):
         announcement_pk: str
 
     username: str
-    last_login: Optional[bool]
-    announcement: Optional[Announcement]
+    last_login: bool | None
+    announcement: Announcement | None
 
 
 class RealmRolesPOST(BaseModel):

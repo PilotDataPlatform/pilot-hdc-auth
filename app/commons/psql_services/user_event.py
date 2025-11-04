@@ -4,8 +4,6 @@
 # Version 3.0 (the "License") available at https://www.gnu.org/licenses/agpl-3.0.en.html.
 # You may not use this file except in compliance with the License.
 
-from typing import Tuple
-
 from fastapi_sqlalchemy import db
 from sqlalchemy import or_
 
@@ -16,7 +14,7 @@ from app.models.sql_events import UserEventModel
 from app.resources.error_handler import APIException
 
 
-def query_events(query: dict, page: int, page_size: int, order_type: str, order_by: str) -> Tuple[list, int]:
+def query_events(query: dict, page: int, page_size: int, order_type: str, order_by: str) -> tuple[list, int]:
     try:
         event_query = db.session.query(UserEventModel)
         for key, value in query.items():

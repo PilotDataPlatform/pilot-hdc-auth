@@ -5,11 +5,10 @@
 # You may not use this file except in compliance with the License.
 
 import time as tm
+from collections.abc import Mapping
 from enum import Enum
 from http import HTTPStatus
 from typing import Any
-from typing import Mapping
-from typing import Optional
 from uuid import UUID
 
 from httpx import AsyncClient
@@ -71,7 +70,7 @@ class KeycloakClient:
         return int(tm.monotonic()) >= (self.access_token_expiration - 10)
 
     async def _request(
-        self, method: str, path: str, json: Optional[Any] = None, params: Optional[Mapping[str, Any]] = None
+        self, method: str, path: str, json: Any | None = None, params: Mapping[str, Any] | None = None
     ) -> Response:
         """Make http request.
 
@@ -96,7 +95,7 @@ class KeycloakClient:
                 raise NotFound
             raise e
 
-    async def _get(self, path: str, params: Optional[Mapping[str, Any]] = None) -> Response:
+    async def _get(self, path: str, params: Mapping[str, Any] | None = None) -> Response:
         """Send GET request."""
 
         return await self._request('GET', path, params=params)

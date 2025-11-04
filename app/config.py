@@ -7,44 +7,16 @@
 import logging
 from functools import lru_cache
 from typing import Any
-from typing import Dict
-from typing import Optional
 
-from common import VaultClient
 from pydantic import BaseSettings
 from pydantic import Extra
-
-
-class VaultConfig(BaseSettings):
-    """Store vault related configuration."""
-
-    APP_NAME: str = 'service_auth'
-    CONFIG_CENTER_ENABLED: bool = False
-
-    VAULT_URL: Optional[str]
-    VAULT_CRT: Optional[str]
-    VAULT_TOKEN: Optional[str]
-
-    class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
-
-
-def load_vault_settings(settings: BaseSettings) -> Dict[str, Any]:
-    config = VaultConfig()
-
-    if not config.CONFIG_CENTER_ENABLED:
-        return {}
-
-    client = VaultClient(config.VAULT_URL, config.VAULT_CRT, config.VAULT_TOKEN)
-    return client.get_from_vault(config.APP_NAME)
 
 
 class Settings(BaseSettings):
     """Store service configuration settings."""
 
     APP_NAME: str = 'service_auth'
-    VERSION: str = '0.1.0'
+    VERSION: str = '2.2.28'
     PORT: int = 5061
     HOST: str = '0.0.0.0'
     WORKERS: int = 1
@@ -63,26 +35,26 @@ class Settings(BaseSettings):
     EMAIL_HELPDESK: str
 
     IDENTITY_BACKEND: str
-    FREEIPA_URL: Optional[str]
-    FREEIPA_USERNAME: Optional[str]
-    FREEIPA_PASSWORD: Optional[str]
+    FREEIPA_URL: str | None
+    FREEIPA_USERNAME: str | None
+    FREEIPA_PASSWORD: str | None
     USER_OBJECT_GROUPS: str = ''
 
     # LDAP configs
-    LDAP_URL: Optional[str]
-    LDAP_ADMIN_DN: Optional[str]
-    LDAP_ADMIN_SECRET: Optional[str]
-    LDAP_OU: Optional[str]
-    LDAP_DC1: Optional[str]
-    LDAP_DC2: Optional[str]
-    LDAP_USER_GROUP: Optional[str]
-    LDAP_USER_QUERY_FIELD: Optional[str]
-    LDAP_PREFIX: Optional[str]
-    LDAP_SET_GIDNUMBER: Optional[bool]
-    LDAP_OPT_REFERRALS: Optional[int]
-    LDAP_GID_LOWER_BOUND: Optional[int]
-    LDAP_GID_UPPER_BOUND: Optional[int]
-    LDAP_GROUP_OBJECTCLASS: Optional[str]
+    LDAP_URL: str | None
+    LDAP_ADMIN_DN: str | None
+    LDAP_ADMIN_SECRET: str | None
+    LDAP_OU: str | None
+    LDAP_DC1: str | None
+    LDAP_DC2: str | None
+    LDAP_USER_GROUP: str | None
+    LDAP_USER_QUERY_FIELD: str | None
+    LDAP_PREFIX: str | None
+    LDAP_SET_GIDNUMBER: bool | None
+    LDAP_OPT_REFERRALS: int | None
+    LDAP_GID_LOWER_BOUND: int | None
+    LDAP_GID_UPPER_BOUND: int | None
+    LDAP_GROUP_OBJECTCLASS: str | None
 
     # BFF RDS
     RDS_HOST: str
@@ -136,10 +108,6 @@ class Settings(BaseSettings):
         env_file = '.env'
         env_file_encoding = 'utf-8'
         extra = Extra.allow
-
-        @classmethod
-        def customise_sources(cls, init_settings, env_settings, file_secret_settings):
-            return init_settings, env_settings, load_vault_settings, file_secret_settings
 
     def __init__(self, *args: Any, **kwds: Any) -> None:
         super().__init__(*args, **kwds)
