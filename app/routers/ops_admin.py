@@ -16,6 +16,7 @@ from keycloak import exceptions
 from app.commons.psql_services.permissions import create_role_record
 from app.components.identity.crud import IdentityCRUD
 from app.components.identity.dependencies import get_identity_crud
+from app.logger import AuditLog
 from app.logger import logger
 from app.models.api_response import APIResponse
 from app.models.api_response import EAPIResponseCode
@@ -261,10 +262,11 @@ class RealmRoles:
 
         res = APIResponse()
         try:
-            user = await self.identity_crud.get_user_by_username(username)
-            user_id = user.get('id')
+            with AuditLog('get user realm roles', username=username):
+                user = await self.identity_crud.get_user_by_username(username)
+                user_id = user.get('id')
 
-            result = await self.identity_crud.get_user_realm_roles(user_id)
+                result = await self.identity_crud.get_user_realm_roles(user_id)
             res.result = result
             res.code = EAPIResponseCode.success
         except Exception as e:
@@ -291,14 +293,16 @@ class RealmRoles:
         """
 
         res = APIResponse()
+        project_roles = data.project_roles
+        project_code = data.project_code
+
         try:
-            project_roles = data.project_roles
-            project_code = data.project_code
             operations_admin = await self.identity_crud.create_operations_admin()
-            await operations_admin.create_project_realm_roles(project_roles, project_code)
-            for role in project_roles:
-                is_default = role in ['admin', 'contributor', 'collaborator']
-                await run_in_threadpool(create_role_record, role, project_code, is_default)
+            with AuditLog('add new realm roles', project_code=project_code, project_roles=project_roles):
+                await operations_admin.create_project_realm_roles(project_roles, project_code)
+                for role in project_roles:
+                    is_default = role in ['admin', 'contributor', 'collaborator']
+                    await run_in_threadpool(create_role_record, role, project_code, is_default)
 
             res.result = 'success'
             res.code = EAPIResponseCode.success
