@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse
 from fastapi.responses import Response
 from fastapi_utils import cbv
 
+from app.logger import AuditLog
 from app.logger import logger
 from app.models.user_create import VMUserCreatePOST
 from app.models.user_create import VMUserPasswordResetPOST
@@ -126,8 +127,9 @@ class VMUserOperations:
 
         logger.info('Call API to find a user by email')
 
-        async with freeipa_client:
-            user = await freeipa_client.get_user_by_username(username)
+        with AuditLog('find VM user', username=username):
+            async with freeipa_client:
+                user = await freeipa_client.get_user_by_username(username)
 
         return JSONResponse(content=user)
 
@@ -140,14 +142,15 @@ class VMUserOperations:
 
         logger.info('Call API to create new user for VM')
 
-        async with freeipa_client:
-            user = await freeipa_client.create_user(
-                username=data.username,
-                email=data.email,
-                first_name=data.first_name,
-                last_name=data.last_name,
-                password=data.password,
-            )
+        with AuditLog('create user for VM', username=data.username):
+            async with freeipa_client:
+                user = await freeipa_client.create_user(
+                    username=data.username,
+                    email=data.email,
+                    first_name=data.first_name,
+                    last_name=data.last_name,
+                    password=data.password,
+                )
 
         logger.info(f'Successfully created user {data.username}')
         return JSONResponse(content=user)
@@ -161,13 +164,14 @@ class VMUserOperations:
 
         logger.info('Call API to reset user password for VM')
 
-        async with freeipa_client:
-            # password of length 10, only numbers
-            new_password = ''.join(secrets.choice(string.ascii_lowercase) for i in range(10))
-            await freeipa_client.reset_password(
-                username=data.username,
-                new_password=new_password,
-            )
+        with AuditLog('reset password for VM user', username=data.username):
+            async with freeipa_client:
+                # password of length 10, only numbers
+                new_password = ''.join(secrets.choice(string.ascii_lowercase) for i in range(10))
+                await freeipa_client.reset_password(
+                    username=data.username,
+                    new_password=new_password,
+                )
 
         result = {'username': data.username, 'password': new_password}
         logger.info(f'Successfully reset password for user {data.username}')
@@ -182,22 +186,23 @@ class VMUserOperations:
 
         logger.info('Call API to create new user for VM')
 
-        async with freeipa_client:
-            try:
-                user = await freeipa_client.get_user_by_username(data.username)
-            except HTTPException:
-                user = await freeipa_client.create_user(
-                    username=data.username,
-                    email=data.email,
-                    first_name=data.first_name,
-                    last_name=data.last_name,
-                    password=data.password,
-                )
-                logger.info(f'Creating user {data.username} for first-time accessing the VMs')
+        with AuditLog('create or modify user for VM', username=data.username):
+            async with freeipa_client:
+                try:
+                    user = await freeipa_client.get_user_by_username(data.username)
+                except HTTPException:
+                    user = await freeipa_client.create_user(
+                        username=data.username,
+                        email=data.email,
+                        first_name=data.first_name,
+                        last_name=data.last_name,
+                        password=data.password,
+                    )
+                    logger.info(f'Creating user {data.username} for first-time accessing the VMs')
 
-            rule = await freeipa_client.get_hbac_rule_by_name(data.project_code)
+                rule = await freeipa_client.get_hbac_rule_by_name(data.project_code)
 
-            await freeipa_client.add_user_to_hbac_rule(user['username'], rule['name'])
+                await freeipa_client.add_user_to_hbac_rule(user['username'], rule['name'])
 
         message = f'User {user["username"]} was granted access to VM for project {data.project_code}'
         logger.info(message)

@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     """Store service configuration settings."""
 
     APP_NAME: str = 'service_auth'
-    VERSION: str = '2.2.28'
+    VERSION: str = '2.2.30'
     PORT: int = 5061
     HOST: str = '0.0.0.0'
     WORKERS: int = 1
