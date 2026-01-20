@@ -79,7 +79,7 @@ class UserADGroupOperations:
                     operation_type=operation_type,
                     group_code=group_code,
                 )
-        except Exception as e:
+        except Exception:
             logger.audit(
                 'Received an unexpected error while attempting to change user participation in project.',
                 user_email=user_email,
@@ -87,7 +87,7 @@ class UserADGroupOperations:
                 group_code=group_code,
             )
             msg = 'Failed to add user to group'
-            logger.error(f'{msg}: {e.content.get("error_msg")}')
+            logger.exception(msg)
             response.error_msg = msg
             response.code = EAPIResponseCode.internal_error
             response.total = 0
@@ -119,9 +119,9 @@ class UserADGroupOperations:
             async with IdentityClient() as client:
                 group_name = client.format_group_name(data.group_name)
                 await client.create_group(group_name, data.description)
-        except Exception as e:
+        except Exception:
             msg = 'Failed to create group'
-            logger.error(f'{msg}: {e.content.get("error_msg")}')
+            logger.exception(msg)
             response.error_msg = msg
             response.code = EAPIResponseCode.internal_error
             response.total = 0
@@ -153,7 +153,7 @@ class UserADGroupOperations:
                 await client.delete_group(client.format_group_name(data.group_name))
         except Exception as e:
             msg = 'Failed to delete group'
-            logger.error(f'{msg}: {e.content.get("error_msg")}')
+            logger.exception(msg)
             if type(e) == APIException:
                 response.error_msg = e.content.get('error_msg')
                 response.code = e.status_code
