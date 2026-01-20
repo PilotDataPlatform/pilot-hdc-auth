@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     LDAP_DC2: str | None
     LDAP_USER_GROUP: str | None
     LDAP_USER_QUERY_FIELD: str | None
-    LDAP_PREFIX: str | None
+    LDAP_PREFIX: str = 'hdc'
     LDAP_SET_GIDNUMBER: bool | None
     LDAP_OPT_REFERRALS: int | None
     LDAP_GID_LOWER_BOUND: int | None

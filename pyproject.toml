@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "service_auth"
-version = "2.2.31"
+version = "2.2.32"
 description = ""
 authors = ["Indoc Research <admin@indocresearch.org>"]
 
@@ -19,7 +19,7 @@ opentelemetry-instrumentation-fastapi = "0.29b0"
 psycopg2-binary = "2.9.3"
 pycparser = "2.20"
 pydantic = "1.10.19"
-python-keycloak = { git = "https://github.com/PilotDataPlatform/python-keycloak" }
+python-keycloak = { git = "https://github.com/Indoc-Research/pilot-hdc-python-keycloak" }
 python-ldap = "3.4.0"
 pytz = "2020.1"
 requests = "2.32.5"
