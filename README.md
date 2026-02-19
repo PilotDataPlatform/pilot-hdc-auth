@@ -23,19 +23,15 @@ This project is using [Poetry](https://python-poetry.org/docs/#installation) to 
 
 3. Add environment variables into `.env`. Use `.env.schema` as a reference.
 
-
 4. Run setup scripts for postgres
     - [Create DB](https://github.com/PilotDataPlatform/auth/blob/develop/migrations/scripts/create_db.sql)
     - [Create Schemas](https://github.com/PilotDataPlatform/auth/blob/develop/migrations/scripts/create_schema.sql)
 
-6. Run schema migration using alembic.
+5. Run schema migration using alembic.
 
        poetry run alembic upgrade head
 
-7. Run SQL script to populate casbin permissions
-    - [Casbin Script](https://github.com/PilotDataPlatform/auth/blob/develop/migrations/scripts/create_schema.sql)
-
-8. Run application.
+6. Run application.
 
        poetry run python run.py
 
