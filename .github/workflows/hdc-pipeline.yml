@@ -36,10 +36,3 @@ jobs:
       service_key: auth-service
       image_tag: ${{ needs.build_and_publish_hdc.outputs.app_version }}
     secrets: inherit
-
-  deploy_hdc:
-    needs: [build_and_publish_hdc]
-    uses: PilotDataPlatform/pilot-hdc-ci-tools/.github/workflows/trigger_deployment.yml@main
-    with:
-      hdc_service_name: 'auth'
-    secrets: inherit
