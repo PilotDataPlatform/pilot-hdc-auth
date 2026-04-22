@@ -86,7 +86,7 @@ class FreeIPAClient:
             return {
                 'name': hbac_rule['result'][0]['cn'][0],
                 'description': hbac_rule['result'][0]['description'][0],
-                'members': hbac_rule['result'][0]['memberuser_user'],
+                'members': hbac_rule['result'][0].get('memberuser_user', []),
                 'dn': hbac_rule['result'][0]['dn'],
             }
 
